@@ -221,13 +221,14 @@ contains
     integer, dimension(:), allocatable :: petList, recvBuffer
     type(ESMF_Clock) :: clock
     type(ESMF_Field), pointer :: fieldList(:)
-    type(ESMF_Grid)  :: grid
+    type(ESMF_Grid)  :: grid, mapl_factory_grid
     type(ESMF_State) :: importState, exportState
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_VM)    :: vm
     type(Aerosol_InternalState_T) :: is
     type(MAPL_Cap), pointer :: this
     type(MAPL_CapOptions) :: maplCapOptions
+    type(ExternalGridFactory) :: external_grid_factory
 
     ! begin
     rc = ESMF_SUCCESS
@@ -340,7 +341,10 @@ contains
       file=__FILE__)) &
       return  ! bail out
 
-    call this % cap_gc % set(grid=grid, _RC)
+    external_grid_factory = ExternalGridFactory(grid=grid, _RC)
+    mapl_factory_grid = grid_manager%make_grid(external_grid_factory, _RC)
+
+    call this % cap_gc % set_grid(mapl_factory_grid, _RC)
 
     call this % cap_gc % initialize(_RC)
 
