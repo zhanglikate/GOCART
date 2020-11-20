@@ -221,14 +221,13 @@ contains
     integer, dimension(:), allocatable :: petList, recvBuffer
     type(ESMF_Clock) :: clock
     type(ESMF_Field), pointer :: fieldList(:)
-    type(ESMF_Grid)  :: grid, mapl_factory_grid
+    type(ESMF_Grid)  :: grid
     type(ESMF_State) :: importState, exportState
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_VM)    :: vm
     type(Aerosol_InternalState_T) :: is
     type(MAPL_Cap), pointer :: this
     type(MAPL_CapOptions) :: maplCapOptions
-    type(ExternalGridFactory) :: external_grid_factory
 
     ! begin
     rc = ESMF_SUCCESS
@@ -334,15 +333,8 @@ contains
 
     call this % cap_gc % set_services(_RC)
 
-    ! decorate grid object so it can be shared with MAPL
-    call ESMF_AttributeSet(grid, name='GRID_LM', value=nlev, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__,  &
-      file=__FILE__)) &
-      return  ! bail out
-
     ! provide model grid to MAPL
-    call this % cap_gc % set_grid(grid, _RC)
+    call this % cap_gc % set_grid(grid, lm=nlev, _RC)
 
     ! provide model clock to MAPL
     call this % cap_gc % set_clock(clock, _RC)
