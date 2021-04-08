@@ -87,7 +87,7 @@
      type(Chem_MieTable), pointer :: vtableUse => null()
   end type Chem_Mie
 
-# ifndef HAS_NETCDF3
+#ifndef HAS_NETCDF3
   external nf_open, nf_inq_dimid, nf_inq_dimlen, nf_inq_varid, &
            nf_get_var_double, nf_close
 #endif
