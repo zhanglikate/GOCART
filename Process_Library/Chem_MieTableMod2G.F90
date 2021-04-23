@@ -9,7 +9,10 @@
 
 ! !USES:
    implicit none
+
+#ifdef HAS_NETCDF3
    include "netcdf.inc"    ! Required for Mie tables stored as NCDF files
+#endif
 
 ! !PUBLIC TYPES:
 !
