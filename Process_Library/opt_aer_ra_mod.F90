@@ -48,7 +48,7 @@ CONTAINS
       do k = kts,kte
       do i = its,ite
         if(tauaersw(i,k,j,1).gt.thresh .and. tauaersw(i,k,j,4).gt.thresh) then
-           ang=alog(tauaersw(i,k,j,1)/tauaersw(i,k,j,4))/alog(999./300.)
+           ang=log(tauaersw(i,k,j,1)/tauaersw(i,k,j,4))/log(999./300.)
            extt(i,k,j,ib)=tauaersw(i,k,j,2)*(0.4/midbands(ib))**ang 
 
 ! ssa - linear interpolation; extrapolation

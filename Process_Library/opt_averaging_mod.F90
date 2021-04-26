@@ -2057,7 +2057,7 @@ END subroutine optical_prep_modal_soa_vbs
 ! as stated by Bohren and Huffman, this is 4*pie times what is should be
 ! may need to be smoothed - a very rough function - for the time being we won't apply smoothing
 ! and let the integration over the size distribution be the smoothing
-                  sb2(n)=4.0*sback*dconjg(sback)/(thesize*thesize) ! JCB 2007/02/01  
+                  sb2(n)=4.0*sback*conjg(sback)/(thesize*thesize) ! JCB 2007/02/01  
                 enddo
 !
                call fitcurv(rs,qext4,extpsw(1,nr,ni,ns),ncoef,nsiz)
@@ -2872,7 +2872,7 @@ END subroutine optical_prep_modal_soa_vbs
       equivalence  ( cbiga, rbiga )
       logical, save :: pass1
       data  pass1 / .true. /
-      sq( ctmp ) = dble( ctmp )**2 + dimag( ctmp )**2
+      sq( ctmp ) = dble( ctmp )**2 + aimag( ctmp )**2
 !
 !
       if ( pass1 )  then
@@ -2917,14 +2917,14 @@ END subroutine optical_prep_modal_soa_vbs
       if ( .not.perfct )  then
 !
          cior = crefin
-         if ( dimag( cior ) .gt. 0.0 )  cior = dconjg( cior )
+         if ( aimag( cior ) .gt. 0.0 )  cior = conjg( cior )
          mre =     dble( cior )
-         mim =  - dimag( cior )
+         mim =  - aimag( cior )
          noabs = mim .le. mimcut
          cioriv = 1.0 / cior
          rioriv = 1.0 / mre
 !
-         if ( xx * dmax1( 1.d0, cdabs(cior) ) .le. 0.d1 ) then
+         if ( xx * dmax1( 1.d0, abs(cior) ) .le. 0.d1 ) then
 !
 !                                    ** use general-refractive-index
 !                                    ** small-particle limit
@@ -2962,8 +2962,8 @@ END subroutine optical_prep_modal_soa_vbs
 !                            ** (psi,chi,zeta)-sub-(0,1) for upward
 !                            ** recurrence ( ref. 1, eq. 19 )
       xinv = 1.0 / xx
-      psinm1   = dsin( xx )
-      chinm1   = dcos( xx )
+      psinm1   = SIN( xx )
+      chinm1   = COS( xx )
       psin = psinm1 * xinv - chinm1
       chin = chinm1 * xinv + psinm1
       zetnm1 = dcmplx( psinm1, chinm1 )
@@ -3047,9 +3047,9 @@ END subroutine optical_prep_modal_soa_vbs
          tforw( 1 ) = tforw( 1 ) + tcoef  * ( an - bn )
          sback      = sback      + ( mm * twonp1 ) * ( an - bn )
          tback( 1 ) = tback( 1 ) + ( mm * tcoef )  * ( an + bn )
-         gqsc = gqsc + ( fn - rn ) * dble( anm1 * dconjg( an )   &
-                                         + bnm1 * dconjg( bn ) )   &
-                + coeff * dble( an * dconjg( bn ) )
+         gqsc = gqsc + ( fn - rn ) * dble( anm1 * conjg( an )   &
+                                         + bnm1 * conjg( bn ) )   &
+                + coeff * dble( an * conjg( bn ) )
 !
          if ( yesang )  then
 !                                      ** put mie coefficients in form
@@ -3154,19 +3154,19 @@ END subroutine optical_prep_modal_soa_vbs
            call lpcoef ( ntrm, nmom, ipolzn, momdim, calcmo, npquan,   &
                          lita, litb, pmom )
 !
-      if ( dimag(crefin) .gt. 0.0 )  then
+      if ( aimag(crefin) .gt. 0.0 )  then
 !                                         ** take complex conjugates
 !                                         ** of scattering amplitudes
-         sforw = dconjg( sforw )
-         sback = dconjg( sback )
+         sforw = conjg( sforw )
+         sback = conjg( sback )
          do  210  i = 1, 2
-            tforw( i ) = dconjg( tforw(i) )
-            tback( i ) = dconjg( tback(i) )
+            tforw( i ) = conjg( tforw(i) )
+            tback( i ) = conjg( tback(i) )
   210    continue
 !
          do  220  j = 1, numang
-            s1( j ) = dconjg( s1(j) )
-            s2( j ) = dconjg( s2(j) )
+            s1( j ) = conjg( s1(j) )
+            s2( j ) = conjg( s2(j) )
   220    continue
 !
       end if
@@ -3277,7 +3277,7 @@ END subroutine optical_prep_modal_soa_vbs
            call errmsg( 'miev0--input error(s).  aborting...', .true. )
 !
       if ( xx.gt.20000.0 .or. dble(crefin).gt.10.0 .or.   &
-           dabs( dimag(crefin) ).gt.10.0 )  call  errmsg(   &
+           abs( aimag(crefin) ).gt.10.0 )  call  errmsg(   &
            'miev0--xx or crefin outside tested range', .false. )
 !
       return
@@ -3508,8 +3508,8 @@ END subroutine optical_prep_modal_soa_vbs
                thesum = 0.0
                do  100  m = ld2, mmax - i
                   thesum = thesum + am( m ) *   &
-                            ( dble( c(m-i+1) * dconjg( c(m+i+idel) ) )   &
-                            + dble( d(m-i+1) * dconjg( d(m+i+idel) ) ) )
+                            ( dble( c(m-i+1) * conjg( c(m+i+idel) ) )   &
+                            + dble( d(m-i+1) * conjg( d(m+i+idel) ) ) )
   100          continue
                pmom( l,1 ) = pmom( l,1 ) + bidel( i ) * thesum
   110       continue
@@ -3524,7 +3524,7 @@ END subroutine optical_prep_modal_soa_vbs
                thesum = 0.0
                do  150  m = ld2, mmax - i
                   thesum = thesum + am( m ) *   &
-                              dble( c(m-i+1) * dconjg( c(m+i+idel) ) )
+                              dble( c(m-i+1) * conjg( c(m+i+idel) ) )
   150          continue
                pmom( l,1 ) = pmom( l,1 ) + bidel( i ) * thesum
   160       continue
@@ -3537,7 +3537,7 @@ END subroutine optical_prep_modal_soa_vbs
                thesum = 0.0
                do  200  m = ld2, mmax - i
                   thesum = thesum + am( m ) *   &
-                              dble( d(m-i+1) * dconjg( d(m+i+idel) ) )
+                              dble( d(m-i+1) * conjg( d(m+i+idel) ) )
   200          continue
                pmom( l,2 ) = pmom( l,2 ) + bidel( i ) * thesum
   210       continue
@@ -3550,8 +3550,8 @@ END subroutine optical_prep_modal_soa_vbs
                thesum = 0.0
                do  300  m = ld2, mmax - i
                   thesum = thesum + am( m ) *   &
-                            ( dble( c(m-i+1) * dconjg( d(m+i+idel) ) )   &
-                            + dble( c(m+i+idel) * dconjg( d(m-i+1) ) ) )
+                            ( dble( c(m-i+1) * conjg( d(m+i+idel) ) )   &
+                            + dble( c(m+i+idel) * conjg( d(m-i+1) ) ) )
   300          continue
                pmom( l,3 ) = pmom( l,3 ) + bidel( i ) * thesum
   310       continue
@@ -3565,8 +3565,8 @@ END subroutine optical_prep_modal_soa_vbs
                thesum = 0.0
                do  400  m = ld2, mmax - i
                   thesum = thesum + am( m ) *   &
-                            ( dimag( c(m-i+1) * dconjg( d(m+i+idel) ) )   &
-                            + dimag( c(m+i+idel) * dconjg( d(m-i+1) ) ))
+                            ( aimag( c(m-i+1) * conjg( d(m+i+idel) ) )   &
+                            + aimag( c(m+i+idel) * conjg( d(m-i+1) ) ))
   400          continue
                pmom( l,4 ) = pmom( l,4 ) + bidel( i ) * thesum
   410       continue
@@ -3596,19 +3596,19 @@ END subroutine optical_prep_modal_soa_vbs
       integer  ipolzn, momdim, nmom,nummom,l
       real(kind_chem)    pmom( 0:momdim, * ),sq,a1sq,b1sq
       complex  a(*), b(*), ctmp, a1b1c
-      sq( ctmp ) = dble( ctmp )**2 + dimag( ctmp )**2
+      sq( ctmp ) = dble( ctmp )**2 + aimag( ctmp )**2
 !
 !
       a1sq = sq( a(1) )
       b1sq = sq( b(1) )
-      a1b1c = a(1) * dconjg( b(1) )
+      a1b1c = a(1) * conjg( b(1) )
 !
       if( ipolzn.lt.0 )  then
 !
          if( calcmo(1) )  pmom( 0,1 ) = 2.25 * b1sq
          if( calcmo(2) )  pmom( 0,2 ) = 2.25 * a1sq
          if( calcmo(3) )  pmom( 0,3 ) = 2.25 * dble( a1b1c )
-         if( calcmo(4) )  pmom( 0,4 ) = 2.25 *dimag( a1b1c )
+         if( calcmo(4) )  pmom( 0,4 ) = 2.25 *aimag( a1b1c )
 !
       else
 !
@@ -3642,9 +3642,9 @@ END subroutine optical_prep_modal_soa_vbs
             end if
 !
             if( calcmo(4) )  then
-               if( l.eq.0 )  pmom( l,4 ) = - 1.5 * dimag( a1b1c )
+               if( l.eq.0 )  pmom( l,4 ) = - 1.5 * aimag( a1b1c )
                if( l.eq.1 )  pmom( l,4 ) = 0.0
-               if( l.eq.2 )  pmom( l,4 ) = 0.3 * dimag( a1b1c )
+               if( l.eq.2 )  pmom( l,4 ) = 0.3 * aimag( a1b1c )
             end if
 !
   100    continue
@@ -3672,16 +3672,16 @@ END subroutine optical_prep_modal_soa_vbs
       real(kind_chem)    pmom( 0:momdim, * ),sq,pm1,pm2,a2sq,b2sq
       complex  a(*), b(*)
       complex  a2c, b2c, ctmp, ca, cac, cat, cb, cbc, cbt, cg, ch
-      sq( ctmp ) = dble( ctmp )**2 + dimag( ctmp )**2
+      sq( ctmp ) = dble( ctmp )**2 + aimag( ctmp )**2
 !
 !
       ca = 3. * a(1) - 5. * b(2)
       cat= 3. * b(1) - 5. * a(2)
-      cac = dconjg( ca )
+      cac = conjg( ca )
       a2sq = sq( a(2) )
       b2sq = sq( b(2) )
-      a2c = dconjg( a(2) )
-      b2c = dconjg( b(2) )
+      a2c = conjg( a(2) )
+      b2c = conjg( b(2) )
 !
       if( ipolzn.lt.0 )  then
 !                                   ** loop over sekera moments
@@ -3711,11 +3711,11 @@ END subroutine optical_prep_modal_soa_vbs
             end if
 !
             if( calcmo(4) )  then
-               if( l.eq.0 ) pmom( l,4 ) = -0.25 * dimag( cat*cac +   &
+               if( l.eq.0 ) pmom( l,4 ) = -0.25 * aimag( cat*cac +   &
                                                  (100./3.)*b(2)*a2c )
-               if( l.eq.1 ) pmom( l,4 ) = -5./6. * dimag( b(2)*cac +   &
+               if( l.eq.1 ) pmom( l,4 ) = -5./6. * aimag( b(2)*cac +   &
                                                         cat*a2c )
-               if( l.eq.2 ) pmom( l,4 ) = -10./3. * dimag( b(2) * a2c )
+               if( l.eq.2 ) pmom( l,4 ) = -10./3. * aimag( b(2) * a2c )
             end if
 !
    50    continue
@@ -3724,7 +3724,7 @@ END subroutine optical_prep_modal_soa_vbs
 !
          cb = 3. * b(1) + 5. * a(2)
          cbt= 3. * a(1) + 5. * b(2)
-         cbc = dconjg( cb )
+         cbc = conjg( cb )
          cg = ( cbc*cbt + 10.*( cac*a(2) + b2c*cat) ) / 3.
          ch = 2.*( cbc*a(2) + b2c*cbt )
 !
@@ -3746,7 +3746,7 @@ END subroutine optical_prep_modal_soa_vbs
             if( ipolzn.eq.0 .or. calcmo(2) )  then
                if( l.eq.0 ) pm2 = 0.25*sq(cat) + sq(cbt) / 12.   &
                                   + (5./3.) * dble(cat*a2c) + 5.*a2sq
-               if( l.eq.1 ) pm2 = dble( cbt * ( dconjg(cat)/6. + a2c) )
+               if( l.eq.1 ) pm2 = dble( cbt * ( conjg(cat)/6. + a2c) )
                if( l.eq.2 ) pm2 = sq(cbt)/30. + (20./7.) * a2sq   &
                                   + (2./3.) * dble( cat * a2c )
                if( l.eq.3 ) pm2 = (2./7.) * dble( cbt * a2c )
@@ -3771,14 +3771,14 @@ END subroutine optical_prep_modal_soa_vbs
             end if
 !
             if( calcmo(4) )  then
-               if( l.eq.0 ) pmom( l,4 ) = 0.25 * dimag( cac*cat + cg +   &
+               if( l.eq.0 ) pmom( l,4 ) = 0.25 * aimag( cac*cat + cg +   &
                                                         20.*b2c*a(2) )
-               if( l.eq.1 ) pmom( l,4 ) = dimag( cac*cbt + cbc*cat +   &
+               if( l.eq.1 ) pmom( l,4 ) = aimag( cac*cbt + cbc*cat +   &
                                                  3.*ch ) / 12.
-               if( l.eq.2 ) pmom( l,4 ) = 0.1 * dimag( cg + (200./7.) *   &
+               if( l.eq.2 ) pmom( l,4 ) = 0.1 * aimag( cg + (200./7.) *   &
                                                        b2c * a(2) )
-               if( l.eq.3 ) pmom( l,4 ) = dimag( ch ) / 14.
-               if( l.eq.4 ) pmom( l,4 ) = 40./63. * dimag( b2c * a(2) )
+               if( l.eq.3 ) pmom( l,4 ) = aimag( ch ) / 14.
+               if( l.eq.4 ) pmom( l,4 ) = 40./63. * aimag( b2c * a(2) )
             end if
 !
   100    continue
@@ -3823,7 +3823,7 @@ END subroutine optical_prep_modal_soa_vbs
 !                                  ** decide whether 'biga' can be
 !                                  ** calculated by up-recurrence
       mre =  dble( cior )
-      mim =  dabs( dimag( cior ) )
+      mim =  abs( aimag( cior ) )
       if ( mre.lt.1.0 .or. mre.gt.10.0 .or. mim.gt.10.0 )  then
          down = .true.
       else if ( yesang )  then
@@ -3867,9 +3867,9 @@ END subroutine optical_prep_modal_soa_vbs
 !                              *** ( ref. 1, eqs. 20-21 )
          if ( noabs )  then
 !                                            ** no-absorption case
-            rtmp = dsin( mre*xx )
+            rtmp = SIN( mre*xx )
             rbiga( 1 ) =  - rezinv   &
-                           + rtmp / ( rtmp*rezinv - dcos( mre*xx ) )
+                           + rtmp / ( rtmp*rezinv - COS( mre*xx ) )
             do  40  n = 2, ntrm
                rbiga( n ) = - ( n*rezinv )   &
                              + 1.0 / ( ( n*rezinv ) - rbiga( n-1 ) )
@@ -3945,8 +3945,8 @@ END subroutine optical_prep_modal_soa_vbs
       kk  = kk + 2
       cak = ( mm * kk ) * zinv
 !                                         *** ref. 2, eq. 32
-      if (      cdabs( cnumer/cak ).le.eps1   &
-           .or. cdabs( cdenom/cak ).le.eps1 )  then
+      if (      abs( cnumer/cak ).le.eps1   &
+           .or. abs( cdenom/cak ).le.eps1 )  then
 !
 !                                  ** ill-conditioned case -- stride
 !                                  ** two terms instead of one
@@ -3974,8 +3974,8 @@ END subroutine optical_prep_modal_soa_vbs
 !                                    ** check for convergence
 !                                    ** ( ref. 2, eq. 31 )
 !
-         if (      dabs( dble(capt) - 1.0 ).ge.eps2   &
-              .or. dabs( dimag(capt) )      .ge.eps2 )  then
+         if (      abs( dble(capt) - 1.0 ).ge.eps2   &
+              .or. abs( aimag(capt) )      .ge.eps2 )  then
 !
 !                                        *** ref. 2, eqs. 30a-b
             cnumer = cak + 1.0 / cnumer
@@ -4008,7 +4008,7 @@ END subroutine optical_prep_modal_soa_vbs
                       'perfectly conducting case, size parameter =', xx
       if ( .not.perfct )  write ( *, '(''1'',10x,3(a,1p,e11.4))' )   &
                         'refractive index:  real ', dble(crefin),   &
-                   '  imag ', dimag(crefin), ',   size parameter =', xx
+                   '  imag ', aimag(crefin), ',   size parameter =', xx
 !
       if ( prnt(1) .and. numang.gt.0 )  then
 !
@@ -4017,10 +4017,10 @@ END subroutine optical_prep_modal_soa_vbs
           '  --- s1*conjg(s2) ---   i1=s1**2   i2=s2**2  (i1+i2)/2'//   &
           '  deg polzn'
          do  10  i = 1, numang
-            fi1 = dble( s1(i) ) **2 + dimag( s1(i) )**2
-            fi2 = dble( s2(i) ) **2 + dimag( s2(i) )**2
+            fi1 = dble( s1(i) ) **2 + aimag( s1(i) )**2
+            fi2 = dble( s2(i) ) **2 + aimag( s2(i) )**2
             write( *, '( i4, f10.6, 1p,10e11.3 )'   )   &
-                    i, xmu(i), s1(i), s2(i), s1(i)*dconjg(s2(i)),   &
+                    i, xmu(i), s1(i), s2(i), s1(i)*conjg(s2(i)),   &
                     fi1, fi2, 0.5*(fi1+fi2), (fi2-fi1)/(fi2+fi1)
    10    continue
 !
@@ -4086,7 +4086,7 @@ END subroutine optical_prep_modal_soa_vbs
 !
       parameter  ( twothr = 2./3., fivthr = 5./3., fivnin = 5./9. )
       complex    ctmp
-      sq( ctmp ) = dble( ctmp )**2 + dimag( ctmp )**2
+      sq( ctmp ) = dble( ctmp )**2 + aimag( ctmp )**2
 !
 !
       a( 1 ) = dcmplx ( 0.d0, twothr * ( 1. - 0.2 * xx**2 ) )   &
@@ -4101,8 +4101,8 @@ END subroutine optical_prep_modal_soa_vbs
       qsca = 6. * xx**4 * ( sq( a(1) ) + sq( b(1) )   &
                             + fivthr * ( sq( a(2) ) + sq( b(2) ) ) )
       qext = qsca
-      gqsc = 6. * xx**4 * dble( a(1) * dconjg( a(2) + b(1) )   &
-                          + ( b(1) + fivnin * a(2) ) * dconjg( b(2) ) )
+      gqsc = 6. * xx**4 * dble( a(1) * conjg( a(2) + b(1) )   &
+                          + ( b(1) + fivnin * a(2) ) * conjg( b(2) ) )
 !
       rtmp = 1.5 * xx**3
       sforw      = rtmp * ( a(1) + b(1) + fivthr * ( a(2) + b(2) ) )
@@ -4151,7 +4151,7 @@ END subroutine optical_prep_modal_soa_vbs
 !
       parameter  ( twothr = 2./3., fivthr = 5./3. )
       complex  ctmp, ciorsq
-      sq( ctmp ) = dble( ctmp )**2 + dimag( ctmp )**2
+      sq( ctmp ) = dble( ctmp )**2 + aimag( ctmp )**2
 !
 !
       ciorsq = cior**2
@@ -4168,7 +4168,7 @@ END subroutine optical_prep_modal_soa_vbs
              / ( 2. * ciorsq + 3. - ( ciorsq/7. - 0.5 ) * xx**2 )
 !
       qsca = 6. * xx**4 * ( sq(a(1)) + sq(b(1)) + fivthr * sq(a(2)) )
-      gqsc = 6. * xx**4 * dble( a(1) * dconjg( a(2) + b(1) ) )
+      gqsc = 6. * xx**4 * dble( a(1) * conjg( a(2) + b(1) ) )
       qext = qsca
       if ( calcqe ) qext = 6. * xx * dble( a(1) + b(1) + fivthr * a(2) )
 !
@@ -4217,7 +4217,7 @@ END subroutine optical_prep_modal_soa_vbs
       implicit none
       integer momdim,m,n
       real(kind_chem)    qext, qsca, gqsc, pmom( 0:momdim, * )
-      complex  sforw, sback, s1(*), s2(*), tforw(*), tback(*)
+      complex(kind_chem) sforw, sback, s1(*), s2(*), tforw(*), tback(*)
       logical  ok, wrong
 !
       real(kind_chem)    accur, testqe, testqs, testgq, testpm( 0:1 )
@@ -4233,7 +4233,7 @@ END subroutine optical_prep_modal_soa_vbs
       real(kind_chem) calc,exact
 !      data   accur / 1.e-5 /
       data   accur / 1.e-4 /
-      wrong( calc, exact ) = dabs( (calc - exact) / exact ) .gt. accur
+      wrong( calc, exact ) = abs( (calc - exact) / exact ) .gt. accur
 !
 !
       ok = .true.
@@ -4244,36 +4244,36 @@ END subroutine optical_prep_modal_soa_vbs
       if ( wrong( gqsc,testgq ) )   &
            call  tstbad( 'gqsc', abs((gqsc - testgq) / testgq), ok )
 !
-      if ( wrong(  dble(sforw),  dble(testsf) ) .or.   &
-           wrong( dimag(sforw), dimag(testsf) ) )   &
-           call  tstbad( 'sforw', cdabs((sforw - testsf) / testsf), ok )
+      if ( wrong(  real(sforw),  real(testsf) ) .or.   &
+           wrong( aimag(sforw), aimag(testsf) ) )   &
+           call  tstbad( 'sforw', abs((sforw - testsf) / testsf), ok )
 !
-      if ( wrong(  dble(sback),  dble(testsb) ) .or.   &
-           wrong( dimag(sback), dimag(testsb) ) )   &
-           call  tstbad( 'sback', cdabs((sback - testsb) / testsb), ok )
+      if ( wrong(  real(sback),  real(testsb) ) .or.   &
+           wrong( aimag(sback), aimag(testsb) ) )   &
+           call  tstbad( 'sback', abs((sback - testsb) / testsb), ok )
 !
-      if ( wrong(  dble(s1(1)),  dble(tests1) ) .or.   &
-           wrong( dimag(s1(1)), dimag(tests1) ) )   &
-           call  tstbad( 's1', cdabs((s1(1) - tests1) / tests1), ok )
+      if ( wrong(  real(s1(1)),  real(tests1) ) .or.   &
+           wrong( aimag(s1(1)), aimag(tests1) ) )   &
+           call  tstbad( 's1', abs((s1(1) - tests1) / tests1), ok )
 !
-      if ( wrong(  dble(s2(1)),  dble(tests2) ) .or.   &
-           wrong( dimag(s2(1)), dimag(tests2) ) )   &
-           call  tstbad( 's2', cdabs((s2(1) - tests2) / tests2), ok )
+      if ( wrong(  real(s2(1)),  real(tests2) ) .or.   &
+           wrong( aimag(s2(1)), aimag(tests2) ) )   &
+           call  tstbad( 's2', abs((s2(1) - tests2) / tests2), ok )
 !
       do  20  n = 1, 2
-         if ( wrong(  dble(tforw(n)),  dble(testtf(n)) ) .or.   &
-              wrong( dimag(tforw(n)), dimag(testtf(n)) ) )   &
-              call  tstbad( 'tforw', cdabs( (tforw(n) - testtf(n)) /   &
+         if ( wrong(  real(tforw(n)),  real(testtf(n)) ) .or.   &
+              wrong( aimag(tforw(n)), aimag(testtf(n)) ) )   &
+              call  tstbad( 'tforw', abs( (tforw(n) - testtf(n)) /   &
                                            testtf(n) ), ok )
-         if ( wrong(  dble(tback(n)),  dble(testtb(n)) ) .or.   &
-              wrong( dimag(tback(n)), dimag(testtb(n)) ) )   &
-              call  tstbad( 'tback', cdabs( (tback(n) - testtb(n)) /   &
+         if ( wrong(  real(tback(n)),  real(testtb(n)) ) .or.   &
+              wrong( aimag(tback(n)), aimag(testtb(n)) ) )   &
+              call  tstbad( 'tback', abs( (tback(n) - testtb(n)) /   &
                                             testtb(n) ), ok )
    20 continue
 !
       do  30  m = 0, 1
          if ( wrong( pmom(m,1), testpm(m) ) )   &
-              call  tstbad( 'pmom', dabs( (pmom(m,1)-testpm(m)) /   &
+              call  tstbad( 'pmom', abs( (pmom(m,1)-testpm(m)) /   &
                                          testpm(m) ), ok )
    30 continue
 !
@@ -5034,15 +5034,15 @@ END subroutine optical_prep_modal_soa_vbs
       Z(2) =  K3 * RO                                                   
       Z(3) =  K1 * R
       Z(4) =  K2 * R                                                    
-      X1   =  DREAL( Z(1) )
-      Y1   =  DIMAG( Z(1) )                                              
-      X4   =  DREAL( Z(4) )
-      Y4   =  DIMAG( Z(4) )                                              
+      X1   =  REAL( Z(1) )
+      Y1   =  AIMAG( Z(1) )                                              
+      X4   =  REAL( Z(4) )
+      Y4   =  AIMAG( Z(4) )                                              
       RRF  =  1.0D0 / RF
       RX   =  1.0D0 / X                                                   
       RRFX =  RRF * RX
       T(1) =  ( X**2 ) * ( RFR**2 + RFI**2 )                            
-      T(1) =  DSQRT( T(1) )
+      T(1) =  sqrt( T(1) )
       NMX1 =  1.30D0* T(1)
 !
       IF ( NMX1 .LE. LL-1 )   GO TO 21
@@ -5072,14 +5072,14 @@ END subroutine optical_prep_modal_soa_vbs
    23 CONTINUE                                                          
 !
       DO 30   J = 1,JX                                                  
-      IF ( THETD(J) .LT. 0.0D0 )  THETD(J) =  DABS( THETD(J) )
+      IF ( THETD(J) .LT. 0.0D0 )  THETD(J) =  abs( THETD(J) )
       IF ( THETD(J) .GT. 0.0D0 )  GO TO 24                                
       CSTHT(J)  = 1.0D0
       SI2THT(J) = 0.0D0                                                   
       GO TO 30
    24 IF ( THETD(J) .GE. 90.0D0 )  GO TO 25                               
       T(1)      =  ( 3.14159265359 * THETD(J) ) / 180.0D0
-      CSTHT(J)  =  DCOS( T(1) )                                          
+      CSTHT(J)  =  COS( T(1) )                                          
       SI2THT(J) =  1.0D0 - CSTHT(J)**2
       GO TO 30                                                          
    25 IF ( THETD(J) .GT. 90.0 )  GO TO 28
@@ -5100,15 +5100,15 @@ END subroutine optical_prep_modal_soa_vbs
 !
 ! INITIALIZATION OF HOMOGENEOUS SPHERE
 !
-      T(1)   =  DCOS(X)
-      T(2)   =  DSIN(X)                                                  
+      T(1)   =  COS(X)
+      T(2)   =  SIN(X)                                                  
       WM1    =  CMPLX( T(1),-T(2) )
       WFN(1) =  CMPLX( T(2), T(1) )                                     
       TA(1)  =  T(2)
       TA(2)  =  T(1)                                                    
       WFN(2) =  RX * WFN(1) - WM1
-      TA(3)  =  DREAL(WFN(2))                                           
-      TA(4)  =  DIMAG(WFN(2))
+      TA(3)  =  REAL(WFN(2))                                           
+      TA(4)  =  AIMAG(WFN(2))
 !
       n=1 ! jcb, bug???
       IF ( IFLAG .EQ. 2 )   GO TO 560
@@ -5116,16 +5116,16 @@ END subroutine optical_prep_modal_soa_vbs
 !
 ! INITIALIZATION PROCEDURE FOR STRATIFIED SPHERE BEGINS HERE
 !
-      SINX1   =  DSIN( X1 )                                              
-      SINX4   =  DSIN( X4 )
-      COSX1   =  DCOS( X1 )                                              
-      COSX4   =  DCOS( X4 )
-      EY1     =  DEXP( Y1 )                                              
+      SINX1   =  SIN( X1 )                                              
+      SINX4   =  SIN( X4 )
+      COSX1   =  COS( X1 )                                              
+      COSX4   =  COS( X4 )
+      EY1     =  EXP( Y1 )                                              
       E2Y1    =  EY1 * EY1
-      EY4     =  DEXP( Y4 )                                              
-      EY1MY4  =  DEXP( Y1 - Y4 )
+      EY4     =  EXP( Y4 )                                              
+      EY1MY4  =  EXP( Y1 - Y4 )
       EY1PY4  =  EY1 * EY4                                              
-      EY1MY4  =  DEXP( Y1 - Y4 )
+      EY1MY4  =  EXP( Y1 - Y4 )
       AA  =  SINX4 * ( EY1PY4 + EY1MY4 )                                
       BB  =  COSX4 * ( EY1PY4 - EY1MY4 )
       CC  =  SINX1 * ( E2Y1 + 1.0D0 )
@@ -5179,19 +5179,19 @@ END subroutine optical_prep_modal_soa_vbs
 !
 !  Explicit equivalences added by J. Francis
 
-      TB(1) = DREAL(FNA)
-      TB(2) = DIMAG(FNA)
-      TC(1) = DREAL(FNB)
-      TC(2) = DIMAG(FNB)
+      TB(1) = REAL(FNA)
+      TB(2) = AIMAG(FNA)
+      TC(1) = REAL(FNB)
+      TC(2) = AIMAG(FNB)
       GO TO 561                                                         
   560 TC1  =  ACAP(1) * RRF  +  RX
       TC2  =  ACAP(1) * RF   +  RX                                      
       FNA  =  ( TC1 * TA(3)  -  TA(1) ) / ( TC1 * WFN(2)  -  WFN(1) )
       FNB  =  ( TC2 * TA(3)  -  TA(1) ) / ( TC2 * WFN(2)  -  WFN(1) )   
-      TB(1) = DREAL(FNA)
-      TB(2) = DIMAG(FNA)
-      TC(1) = DREAL(FNB)
-      TC(2) = DIMAG(FNB)
+      TB(1) = REAL(FNA)
+      TB(2) = AIMAG(FNA)
+      TC(1) = REAL(FNB)
+      TC(2) = AIMAG(FNB)
 !
   561 CONTINUE
 ! jcb
@@ -5203,10 +5203,10 @@ END subroutine optical_prep_modal_soa_vbs
 ! jcb
       FNAP = FNA
       FNBP = FNB                                                        
-      TD(1) = DREAL(FNAP)
-      TD(2) = DIMAG(FNAP)
-      TE(1) = DREAL(FNBP)
-      TE(2) = DIMAG(FNBP)
+      TD(1) = REAL(FNAP)
+      TD(2) = AIMAG(FNAP)
+      TE(1) = REAL(FNBP)
+      TE(2) = AIMAG(FNBP)
       T(1) = 1.50D0
 !
 !    FROM HERE TO THE STATMENT NUMBER 90, ELTRMX(I,J,K) HAS
@@ -5253,11 +5253,11 @@ END subroutine optical_prep_modal_soa_vbs
 !
       WM1    =  WFN(1)
       WFN(1) =  WFN(2)                                                  
-      TA(1)  =  DREAL(WFN(1))
-      TA(2)  =  DIMAG(WFN(1))                                            
+      TA(1)  =  REAL(WFN(1))
+      TA(2)  =  AIMAG(WFN(1))                                            
       WFN(2) =  T(1) * RX * WFN(1)  -  WM1
-      TA(3)  =  DREAL(WFN(2))                                            
-      TA(4)  =  DIMAG(WFN(2))
+      TA(3)  =  REAL(WFN(2))                                            
+      TA(4)  =  AIMAG(WFN(2))
 !
       IF ( IFLAG .EQ. 2 )   GO TO 1000
 !
@@ -5287,10 +5287,10 @@ END subroutine optical_prep_modal_soa_vbs
                     ( U(2)*U(5)*U(7)  +  K1*U(2)  -  DUMSQ*K3*U(5) )
       FNB  =  U(8) * ( U(3)*U(6)*U(7)  +  K2*U(3)  -  DUMSQ*K2*U(6) ) / &
                     ( U(4)*U(6)*U(7)  +  K2*U(4)  -  DUMSQ*K2*U(6) )
-      TB(1) = DREAL(FNA)
-      TB(2) = DIMAG(FNA)
-      TC(1) = DREAL(FNB)
-      TC(2) = DIMAG(FNB)
+      TB(1) = REAL(FNA)
+      TB(2) = AIMAG(FNA)
+      TC(1) = REAL(FNB)
+      TC(2) = AIMAG(FNB)
 !
  1000 CONTINUE                                                          
       TC1  =  ACAP(N) * RRF  +  N * RX
@@ -5305,10 +5305,10 @@ END subroutine optical_prep_modal_soa_vbs
       IF ( IFLAG .EQ. 1 )   GO TO 1002                                  
  1001 FNA  =  FN1
       FNB  =  FN2                                                       
-      TB(1) = DREAL(FNA)
-      TB(2) = DIMAG(FNA)
-      TC(1) = DREAL(FNB)
-      TC(2) = DIMAG(FNB)
+      TB(1) = REAL(FNA)
+      TB(2) = AIMAG(FNA)
+      TC(1) = REAL(FNB)
+      TC(2) = AIMAG(FNB)
 !
  1002 CONTINUE
 ! jcb
@@ -5363,10 +5363,10 @@ END subroutine optical_prep_modal_soa_vbs
    90 CONTINUE                                                          
       FNAP  =  FNA
       FNBP  =  FNB                                                      
-      TD(1) = DREAL(FNAP)
-      TD(2) = DIMAG(FNAP)
-      TE(1) = DREAL(FNBP)
-      TE(2) = DIMAG(FNBP)
+      TD(1) = REAL(FNAP)
+      TD(2) = AIMAG(FNAP)
+      TE(1) = REAL(FNBP)
+      TE(2) = AIMAG(FNBP)
       IF ( N .LE. NMX2 )   GO TO 65
          WRITE( 6,8 )                                                   
          call errmsg( 'DMIESS: 36', .true.)
@@ -6147,8 +6147,8 @@ END subroutine optical_prep_modal_soa_vbs
                sum = 0.0
                do  100  m = ld2, mmax - i
                   sum = sum + am( m ) * &
-                           ( dble( cm(m-i+1) * dconjg( cm(m+i+idel) ) ) &
-                           + dble( dm(m-i+1) * dconjg( dm(m+i+idel) ) ) )
+                           ( dble( cm(m-i+1) * conjg( cm(m+i+idel) ) ) &
+                           + dble( dm(m-i+1) * conjg( dm(m+i+idel) ) ) )
   100          continue
                pmom( l,1 ) = pmom( l,1 ) + bidel( i ) * sum
   110       continue

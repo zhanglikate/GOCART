@@ -183,11 +183,11 @@ contains
 
       IF( chem_opt /= GOCART_SIMPLE ) THEN
          call wesely_driver(ktau,dtstep,                                 &
-              current_month,                                              &
-              gmt,julday,t_phy,moist,p8w,t8w,raincv,                      &
+              current_month,                                             &
+              gmt,julday,t_phy,moist,p8w,t8w,raincv,                     &
               p_phy,chem,rho_phy,dz8w,ddvel,aer_res_def,aer_res_zcen,    &
               ivgtyp,tsk,gsw,vegfra,pbl,rmol,ust,znt,xlat,xlong,z,z_at_w,&
-              snowh,numgas,                                                    &
+              snowh,numgas,                                              &
               ids,ide, jds,jde, kds,kde,                                 &
               ims,ime, jms,jme, kms,kme,                                 &
               its,ite, jts,jte, kts,kte                                  )

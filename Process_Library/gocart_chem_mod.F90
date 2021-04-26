@@ -60,7 +60,7 @@ contains
        nmx=4
        tdry=0.d0
       xtime=ktau*dtlt/60.
-      ixhour=ifix(gmt+.01)+ifix(xtime/60.)
+      ixhour=int(gmt+.01)+int(xtime/60.)
       xhour=float(ixhour)
       xmin=60.*gmt+(xtime-xhour*60.)
       gmtp=mod(xhour,24.)
@@ -251,7 +251,7 @@ SUBROUTINE chmdrv_su( imx,jmx,lmx,&
   REAL(kind_chem), DIMENSION(imx,jmx,lmx) :: pso2_dms, pmsa_dms, pso4_so2
 
   ! executable statements
-  ndt1=ifix(dt1)
+  ndt1=int(dt1)
   if(ndt1.le.0)stop
 
      CALL chem_dms(imx,jmx,lmx,nmx, ndt1, tmp, airden, airmas, oh, xno3, &

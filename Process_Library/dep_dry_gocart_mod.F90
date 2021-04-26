@@ -139,7 +139,7 @@ SUBROUTINE depvel_gocart(      &
   REAL(kind_chem),    INTENT(IN)  :: ps(imx,jmx)
   INTEGER, INTENT(IN)  :: ilwi(imx,jmx)
   REAL(kind_chem),    INTENT(IN)  :: z0(imx,jmx)
-  REAL,    INTENT(IN)  :: g0
+  REAL(kind_chem),    INTENT(IN)  :: g0
   REAL(kind_chem),    INTENT(OUT) :: dvel(imx,jmx), drydf(imx,jmx)
   
   REAL(kind_chem)    :: obk, vds, czh, rttl, frac, logmfrac, psi_h, cz, eps

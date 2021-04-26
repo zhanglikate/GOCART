@@ -58,7 +58,7 @@ contains
   lmx=1
   nmx=1
   k=kts
-  ndt=ifix(dt)
+  ndt=int(dt)
   do j=jts,jte
   do i=its,ite
 !

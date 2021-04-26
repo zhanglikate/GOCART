@@ -202,7 +202,7 @@ SUBROUTINE vashshort_settling_driver(dt,t_phy,moist,                       &
                               00.975D-6 /)! 3.9 um
   real(kind_chem), DIMENSION (4) :: bstl_ash
   real(kind_chem) :: maxash(4)
-  real :: are
+  real(kind_chem) :: are
   integer nv,iprt,iash
 !srf
 
@@ -294,7 +294,7 @@ SUBROUTINE vashshort_settling_driver(dt,t_phy,moist,                       &
              enddo
           endif
              iprt=0
-          call vsettling(iprt,1, 1, lmx, 4, g,are,&
+          call vsettling(iprt,1, 1, lmx, 4, g, are,&
                     ash, tmp, p_mid, delz, airmas, &
                     den_ash, reff_ash, dt, bstl_ash, rh, idust, iseas,iash)
           ash_fall(i,j)=ash_fall(i,j)+sum(bstl_ash(1:4))

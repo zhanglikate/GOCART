@@ -58,7 +58,7 @@ CONTAINS
        jmx=1
        lmx=1
        nmx=4
-       ndt1=ifix(dt)
+       ndt1=int(dt)
 !
 !
        chmlos = 0.
