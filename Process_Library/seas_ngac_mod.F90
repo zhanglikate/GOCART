@@ -26,12 +26,10 @@
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 
-   PUBLIC  SeasaltEmission
+   PUBLIC  SeasaltEmission_ngac
 
 
 ! !CONSTANTS
-   real(kind=kind_chem), parameter    :: r80fac = 1.65     ! ratio of radius(RH=0.8)/radius(RH=0.) [Gerber]
-   real(kind=kind_chem), parameter    :: rhop = 2200.      ! dry seasalt density [kg m-3]
 
 !
 ! !DESCRIPTION:
@@ -54,7 +52,7 @@ CONTAINS
 !
 ! !INTERFACE:
 !
-   subroutine SeasaltEmission ( rLow, rUp, method, w10m, ustar, &
+   subroutine SeasaltEmission_ngac ( rLow, rUp, method, u10m, v10m, ustar, pi,&
                                 memissions, nemissions, rc )
 
 ! !DESCRIPTION: Calculates the seasalt mass emission flux every timestep.
@@ -71,30 +69,46 @@ CONTAINS
   implicit NONE
 
 ! !INPUT PARAMETERS:
+   real(kind=kind_chem), intent(in)             :: rLow, rUp   ! Dry particle bin edge radii [um]
+   real(kind=kind_chem), intent(in)             :: u10m(:,:)   ! 10-meter eastward wind [m s-1]
+   real(kind=kind_chem), intent(in)             :: v10m(:,:)   ! 10-m northward wind [m s-1]
+   real(kind=kind_chem), target, intent(in)     :: ustar(:,:)  ! friction velocity [m s-1]
+   integer, intent(in)          :: method      ! Algorithm to use
+   real(kind=kind_chem), intent(in)             :: pi          ! pi constant
 
-   real(kind=kind_chem),    intent(in)           :: rLow, rUp   ! Dry particle bin edge radii [um]
-   real(kind=kind_chem),    intent(in)           :: w10m        ! 10-m wind speed [m s-1]
-   real(kind=kind_chem),    intent(in)           :: ustar       ! friction velocity [m s-1]
-   integer, intent(in)           :: method      ! Algorithm to use
+! !INOUTPUT PARAMETERS:
+   real(kind=kind_chem), dimension(:,:), intent(inout) :: memissions      ! Mass Emissions Flux [kg m-2 s-1]
+   real(kind=kind_chem), dimension(:,:), intent(inout) :: nemissions      !Number Emissions Flux [# m-2 s-1]
 
 ! !OUTPUT PARAMETERS:
-
-   real(kind=kind_chem),    intent(inout)        :: memissions      ! Mass Emissions Flux [kg m-2 s-1]
-   real(kind=kind_chem),    intent(inout)        :: nemissions      ! Number Emissions Flux [# m-2 s-1]
    integer, intent(out)          :: rc              ! Error return code:
                                                     !  0 - all is well
                                                     !  1 - 
 ! !Local Variables
    integer       :: ir
-   real(kind=kind_chem)          :: w                               ! Intermediary wind speed [m s-1]
+   real(kind=kind_chem), pointer :: w(:,:)                          !Intermediary wind speed [m s-1]
    real(kind=kind_chem)          :: r, dr                           ! sub-bin radius spacing (dry, um)
    real(kind=kind_chem)          :: rwet, drwet                     ! sub-bin radius spacing (rh=80%, um)
    real(kind=kind_chem)          :: aFac, bFac, scalefac, rpow, exppow, wpow
+   real(kind=kind_chem), allocatable, dimension(:,:), target  :: w10m  ! 10-m wind speed [m s-1]
 
+! !CONSTANTS
+   real(kind=kind_chem), parameter    :: r80fac = 1.65     ! ratio of radius(RH=0.8)/radius(RH=0.) [Gerber]
+   real(kind=kind_chem), parameter    :: rhop = 2200.      ! dry seasalt density [kg m-3]
+!   real, parameter    :: pi = 3.1415       ! ratio of circumference to diameter
+!   of circle
    integer, parameter :: nr = 10                    ! Number of (linear) sub-size bins
-
    character(len=*), parameter :: myname = 'SeasaltEmission'
 
+!EOP
+!-------------------------------------------------------------------------
+!  Begin...
+
+   rc =1
+
+!  Define 10-m wind speed
+   allocate(w10m, mold=u10m)
+   w10m = sqrt(u10m*u10m + v10m*v10m)
 !  Define the sub-bins (still in dry radius)
    dr = (rUp - rLow)/nr
    r  = rLow + 0.5*dr
@@ -117,7 +131,7 @@ CONTAINS
       rpow     = 3.45
       exppow   = 1.607
       wpow     = 3.41
-      w        =  w10m
+      w        => w10m
 
      case(2)  ! Gong 1997
       aFac     = 3.
@@ -126,7 +140,7 @@ CONTAINS
       rpow     = 1.05
       exppow   = 1.19
       wpow     = 3.41
-      w        =  w10m
+      w        => w10m
 
      case(3)  ! GEOS5 2012
       aFac     = 4.7*(1.+30.*rwet)**(-0.017*rwet**(-1.44))
@@ -135,7 +149,7 @@ CONTAINS
       rpow     = 3.45
       exppow   = 1.607
       wpow     = 3.41 - 1.
-      w        =  ustar
+      w        => ustar
 
      case default
 !     if(chem_comm_isroot()) print *, 'SeasaltEmission missing algorithm method'
@@ -146,18 +160,19 @@ CONTAINS
 
 
 !   Number emissions flux (# m-2 s-1)
-    nemissions = nemissions + SeasaltEmissionGong( rwet, drwet, w, scalefac, aFac, bFac, rpow, exppow, wpow )
+    nemissions = nemissions + SeasaltEmissionGong_ngac( rwet, drwet, w, scalefac,aFac, bFac, rpow, exppow, wpow )
+
 !   Mass emissions flux (kg m-2 s-1)
-    scalefac = scalefac * 4./3.*pi*rhop*r**3.*1.e-18 
-    memissions = memissions + SeasaltEmissionGong( rwet, drwet, w, scalefac, aFac, bFac, rpow, exppow, wpow )
+    scalefac = scalefac * 4./3.*pi*rhop*r**3.*1.e-18
+    memissions = memissions + SeasaltEmissionGong_ngac( rwet, drwet, w, scalefac,aFac, bFac, rpow, exppow, wpow )
 
     r = r + dr
 
    end do
-
+   deallocate(w10m)
    rc = 0
 
-  end subroutine SeasaltEmission
+  end subroutine SeasaltEmission_ngac
 
 
 ! Function to compute sea salt emissions following the Gong style
@@ -165,23 +180,22 @@ CONTAINS
 !  dN/dr = scalefac * 1.373 * (w^wpow) * (r^-aFac) * (1+0.057*r^rpow) * 10^(exppow*exp(-bFac^2))
 ! where r is the particle radius at 80% RH, dr is the size bin width at 80% RH, and w is the wind speed
 
-  function SeasaltEmissionGong ( r, dr, w, scalefac, aFac, bFac, rpow, exppow, wpow )
 
+  function SeasaltEmissionGong_ngac ( r, dr, w, scalefac, aFac, bFac, rpow, exppow, wpow )
    real(kind=kind_chem), intent(in)    :: r, dr     ! Wet particle radius, bin width [um]
-   real(kind=kind_chem), intent(in)    :: w         ! Grid box mean wind speed [m s-1] (10-m or ustar wind)
+   real(kind=kind_chem), pointer, intent(in)    :: w(:,:)    ! Grid box mean wind speed [m s-1] (10-m or ustar wind)
    real(kind=kind_chem), intent(in)    :: scalefac, aFac, bFac, rpow, exppow, wpow
-   real(kind=kind_chem)                :: SeasaltEmissionGong
+   real(kind=kind_chem)                ::SeasaltEmissionGong_ngac(size(w,1),size(w,2))
 
 !  Initialize
-   SeasaltEmissionGong = 0.
+   SeasaltEmissionGong_ngac = 0.
 
 !  Particle size distribution function
-   SeasaltEmissionGong = scalefac * 1.373*r**(-aFac)*(1.+0.057*r**rpow) &
+   SeasaltEmissionGong_ngac = scalefac * 1.373*r**(-aFac)*(1.+0.057*r**rpow) &
                          *10**(exppow*exp(-bFac**2.))*dr
 !  Apply wind speed function
-   SeasaltEmissionGong = w**wpow * SeasaltEmissionGong
+   SeasaltEmissionGong_ngac = w**wpow * SeasaltEmissionGong_ngac
 
-  end function SeasaltEmissionGong
-
+  end function SeasaltEmissionGong_ngac
 
   end module seas_ngac_mod

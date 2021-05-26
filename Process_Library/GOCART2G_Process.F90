@@ -63,7 +63,7 @@
 
    real, parameter :: OCEAN=0.0, LAND = 1.0, SEA_ICE = 2.0
    integer, parameter     :: DP = kind(1.0d0)
-
+   integer, parameter :: kind_chem = 8 !lzhang
    type :: EmissionReader
       private
       integer, allocatable :: unit
@@ -96,6 +96,7 @@
 !EOP
 !-------------------------------------------------------------------------
 CONTAINS
+
 
 !==================================================================================
 !BOP
@@ -2464,16 +2465,16 @@ CONTAINS
 
 ! !INPUT PARAMETERS:
 
-   real, intent(in)             :: rLow, rUp   ! Dry particle bin edge radii [um]
-   real, intent(in)             :: u10m(:,:)   ! 10-meter eastward wind [m s-1]
-   real, intent(in)             :: v10m(:,:)   ! 10-m northward wind [m s-1]
-   real, target, intent(in)     :: ustar(:,:)  ! friction velocity [m s-1]
+   real(kind=kind_chem), intent(in)             :: rLow, rUp   ! Dry particle bin edge radii [um]
+   real(kind=kind_chem), intent(in)             :: u10m(:,:)   ! 10-meter eastward wind [m s-1]
+   real(kind=kind_chem), intent(in)             :: v10m(:,:)   ! 10-m northward wind [m s-1]
+   real(kind=kind_chem), target, intent(in)     :: ustar(:,:)  ! friction velocity [m s-1]
    integer, intent(in)          :: method      ! Algorithm to use
-   real, intent(in)             :: pi          ! pi constant
+   real(kind=kind_chem), intent(in)             :: pi          ! pi constant
 
 ! !INOUTPUT PARAMETERS:
-   real, dimension(:,:), intent(inout) :: memissions      ! Mass Emissions Flux [kg m-2 s-1]
-   real, dimension(:,:), intent(inout) :: nemissions      ! Number Emissions Flux [# m-2 s-1]
+   real(kind=kind_chem), dimension(:,:), intent(inout) :: memissions      ! Mass Emissions Flux [kg m-2 s-1]
+   real(kind=kind_chem), dimension(:,:), intent(inout) :: nemissions      ! Number Emissions Flux [# m-2 s-1]
 
 ! !OUTPUT PARAMETERS:
    integer, intent(out)          :: rc              ! Error return code:
@@ -2481,15 +2482,15 @@ CONTAINS
                                                     !  1 - 
 ! !Local Variables
    integer       :: ir
-   real, pointer :: w(:,:)                          ! Intermediary wind speed [m s-1]
-   real          :: r, dr                           ! sub-bin radius spacing (dry, um)
-   real          :: rwet, drwet                     ! sub-bin radius spacing (rh=80%, um)
-   real          :: aFac, bFac, scalefac, rpow, exppow, wpow
-   real, allocatable, dimension(:,:), target  :: w10m  ! 10-m wind speed [m s-1]
+   real(kind=kind_chem), pointer :: w(:,:)                          ! Intermediary wind speed [m s-1]
+   real(kind=kind_chem)          :: r, dr                           ! sub-bin radius spacing (dry, um)
+   real(kind=kind_chem)          :: rwet, drwet                     ! sub-bin radius spacing (rh=80%, um)
+   real(kind=kind_chem)          :: aFac, bFac, scalefac, rpow, exppow, wpow
+   real(kind=kind_chem), allocatable, dimension(:,:), target  :: w10m  ! 10-m wind speed [m s-1]
 
 ! !CONSTANTS
-   real, parameter    :: r80fac = 1.65     ! ratio of radius(RH=0.8)/radius(RH=0.) [Gerber]
-   real, parameter    :: rhop = 2200.      ! dry seasalt density [kg m-3]
+   real(kind=kind_chem), parameter    :: r80fac = 1.65     ! ratio of radius(RH=0.8)/radius(RH=0.) [Gerber]
+   real(kind=kind_chem), parameter    :: rhop = 2200.      ! dry seasalt density [kg m-3]
 !   real, parameter    :: pi = 3.1415       ! ratio of circumference to diameter of circle
    integer, parameter :: nr = 10                    ! Number of (linear) sub-size bins
 
@@ -2575,10 +2576,10 @@ CONTAINS
 
   function SeasaltEmissionGong ( r, dr, w, scalefac, aFac, bFac, rpow, exppow, wpow )
 
-   real, intent(in)    :: r, dr     ! Wet particle radius, bin width [um]
-   real, pointer, intent(in)    :: w(:,:)    ! Grid box mean wind speed [m s-1] (10-m or ustar wind)
-   real, intent(in)    :: scalefac, aFac, bFac, rpow, exppow, wpow
-   real                :: SeasaltEmissionGong(size(w,1),size(w,2))
+   real(kind=kind_chem), intent(in)    :: r, dr     ! Wet particle radius, bin width [um]
+   real(kind=kind_chem), pointer, intent(in)    :: w(:,:)    ! Grid box mean wind speed [m s-1] (10-m or ustar wind)
+   real(kind=kind_chem), intent(in)    :: scalefac, aFac, bFac, rpow, exppow, wpow
+   real(kind=kind_chem)                :: SeasaltEmissionGong(size(w,1),size(w,2))
 
 !  Initialize
    SeasaltEmissionGong = 0.

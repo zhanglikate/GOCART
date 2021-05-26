@@ -7,6 +7,7 @@ module seas_mod
 !                               config => chem_config
   use seas_data_mod
   use seas_ngac_mod
+  use GOCART2G_Process
 
   implicit none
 
@@ -81,10 +82,11 @@ CONTAINS
 !
     integer :: ipr,i,j,imx,jmx,lmx,n,rc,chem_config
     integer,dimension (1,1) :: ilwi
-    real(kind=kind_chem)               :: fsstemis, memissions, nemissions, tskin_c, ws10m
+    real(kind=kind_chem)               :: fsstemis, tskin_c, ws10m
     real(kind=kind_chem) :: delp
     real(kind=kind_chem), DIMENSION (number_ss_bins) :: tc,bems
-    real(kind=kind_chem), dimension (1,1) ::w10m,airmas,tskin
+    real(kind=kind_chem), dimension (1,1) ::w10m,airmas,tskin,uu,vv,ust,&
+                          memissions, nemissions
     real(kind=kind_chem), dimension (1) :: dxy
 
     real(kind=kind_chem), dimension(1,1,1) :: airmas1
@@ -213,11 +215,17 @@ CONTAINS
                   ! -- compute auxiliary variables
                   delp = p8w(i,kts,j)-p8w(i,kts+1,j)
                   if (dz8w(i,kts,j) < 12.) then
-                    ws10m = sqrt(u_phy(i,kts,j)*u_phy(i,kts,j)+v_phy(i,kts,j)*v_phy(i,kts,j))
+                    !ws10m = sqrt(u_phy(i,kts,j)*u_phy(i,kts,j)+v_phy(i,kts,j)*v_phy(i,kts,j))
+                    !w10m = sqrt(u_phy(i,kts,j)*u_phy(i,kts,j)+v_phy(i,kts,j)*v_phy(i,kts,j))
+                    uu=u_phy(i,kts,j)
+                    vv=v_phy(i,kts,j)
                   else
-                    ws10m = sqrt(u10(i,j)*u10(i,j)+v10(i,j)*v10(i,j))
+                    !ws10m = sqrt(u10(i,j)*u10(i,j)+v10(i,j)*v10(i,j))
+                    ! w10m = sqrt(u10(i,j)*u10(i,j)+v10(i,j)*v10(i,j))
+                    uu=u10(i,j)
+                    vv=v10(i,j)
                   end if
-
+                    ust=ustar(i,j)
                   ! -- compute NGAC SST correction
                   tskin_c  = tsk(i,j) - 273.15
                   tskin_c  = min(max(tskin_c, -0.1), 36.0)    ! temperature range (0, 36) C
@@ -230,12 +238,18 @@ CONTAINS
                   do n = 1, number_ss_bins
                     memissions = 0.
                     nemissions = 0.
-                    call SeasaltEmission( ra(n), rb(n), emission_scheme, &
-                                          ws10m, ustar(i,j), memissions, nemissions, rc )
+                    !call SeasaltEmission_ngac( ra(n), rb(n), emission_scheme, &
+                    !                      ws10m, ustar(i,j), memissions, nemissions, rc )
+                    call SeasaltEmission_ngac( ra(n), rb(n), emission_scheme, &
+                                          uu,vv, ust, pi,memissions, nemissions, rc )
+                    !if (Process_library)
+                    !call SeasaltEmission( ra(n), rb(n), emission_scheme, &
+                    !                     uu,vv, ust,pi, memissions, nemissions, rc )
+                    !endif
 !                    if (chem_rc_test((rc /= 0), msg="Error in NGAC sea salt scheme", &
 !                      file=__FILE__, line=__LINE__)) return
 
-                    bems(n) = emission_scale(n) * fsstemis * memissions * random_factor(i,j)
+                    bems(n) = emission_scale(n) * fsstemis * memissions(1,1) * random_factor(i,j)
                     tc(n) = bems(n) * dt * g / delp
                   end do
 
