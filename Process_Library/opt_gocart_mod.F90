@@ -8557,7 +8557,8 @@
 
 
   subroutine aero_opt(sw_or_lw,dz8w,chem             &
-                   ,alt,relhum,aod,tau,ssa,asy                   &
+                   ,alt,relhum,aod,aodbc,aodoc,aoddt,aodss,aodsu&
+                   ,tau,ssa,asy,sca,aaod                   &
                    ,num_chem,ids,ide, jds,jde, kds,kde                     &
                    ,ims,ime, jms,jme, kms,kme                     &
                    ,its,ite, jts,jte, kts,kte )
@@ -8577,7 +8578,8 @@
    REAL(kind_chem), DIMENSION( ims:ime, kms:kme, jms:jme, num_chem ),             &
          INTENT(INOUT ) ::  chem
 !
-   REAL(kind_chem), DIMENSION( ims:ime, jms:jme ) :: aod
+   REAL(kind_chem), DIMENSION( ims:ime, jms:jme ),INTENT(INOUT ) ::aod,aodbc,aodoc,aoddt,&
+                                                    aodss,aodsu,sca,aaod
    REAL(kind_chem), DIMENSION( ims:ime, kms:kme, jms:jme ),                       &
          INTENT(IN ) ::  relhum,dz8w, alt
    integer, dimension( its:ite, jts:jte ) :: iprt
@@ -8616,6 +8618,13 @@
  real(kind_chem), intent(out)   :: asy(its:ite, kts:kte,jts:jte,nband)      !total aerosol asymetry factor
 
 !-----Local variables
+ real(kind_chem) :: taubc(its:ite, kts:kte,jts:jte,nband)      !total aerosol asymetry factor
+ real(kind_chem) :: tauoc(its:ite, kts:kte,jts:jte,nband)      !total aerosol asymetry factor
+ real(kind_chem) :: taudt(its:ite, kts:kte,jts:jte,nband)      !total aerosol asymetry factor
+ real(kind_chem) :: tauss(its:ite, kts:kte,jts:jte,nband)      !total aerosol asymetry factor
+ real(kind_chem) :: tausu(its:ite, kts:kte,jts:jte,nband)      !total aerosol asymetry factor
+ real(kind_chem) :: scat(its:ite, kts:kte,jts:jte,nband)      !total aerosol single scattering albedo
+ real(kind_chem) :: aaodly(its:ite, kts:kte,jts:jte,nband)      !total aerosol single scattering albedo
  integer :: rhi         !RH index
  real(kind_chem) :: rh(kts:kte)      !relative humidity [-]
  real(kind_chem) :: ext           !mass extinction coef [m2/g]
@@ -8720,7 +8729,14 @@
 
          !compute total optical depth single scatterling albedo, asymetry parameters
          tau(i,k,j,n) = sum( tau_typ(1:tgmx) )
+         taubc(i,k,j,n) =  tau_typ(2) 
+         tauoc(i,k,j,n) = sum( tau_typ(3:4) )
+         taudt(i,k,j,n) = sum( tau_typ(7:14) )
+         tauss(i,k,j,n) = sum( tau_typ(5:6) )
+         tausu(i,k,j,n) =  tau_typ(1) 
          ssa(i,k,j,n) = sum( tau_typ(1:tgmx)*ssa_typ(1:tgmx) ) / max(tau(i,k,j,n),1e-08)
+         scat(i,k,j,n)= tau(i,k,j,n)*ssa(i,k,j,n)
+         aaodly(i,k,j,n)= tau(i,k,j,n)*(1-ssa(i,k,j,n))
          asy(i,k,j,n) = sum( tau_typ(1:tgmx)*ssa_typ(1:tgmx)*asy_typ(1:tgmx) ) &
                        /  max(tau(i,k,j,n)*ssa(i,k,j,n),1e-08)
 
@@ -8732,6 +8748,13 @@
 !     endif
   enddo ! vertical loop
       aod(i,j)=sum(tau(i,kts:kte,j,8))
+      aodbc(i,j)=sum(taubc(i,kts:kte,j,8))
+      aodoc(i,j)=sum(tauoc(i,kts:kte,j,8))
+      aoddt(i,j)=sum(taudt(i,kts:kte,j,8))
+      aodss(i,j)=sum(tauss(i,kts:kte,j,8))
+      aodsu(i,j)=sum(tausu(i,kts:kte,j,8))
+      sca(i,j)=sum(scat(i,kts:kte,j,8))
+      aaod(i,j)=sum (aaodly(i,kts:kte,j,8))
 !     if(iprt(i,j).eq.1)write(6,*)'aod = ',aod(i,j)
   enddo
   enddo
