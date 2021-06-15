@@ -8558,7 +8558,7 @@
 
   subroutine aero_opt(sw_or_lw,dz8w,chem             &
                    ,alt,relhum,aod,aodbc,aodoc,aoddt,aodss,aodsu&
-                   ,tau,ssa,asy,sca,aaod                   &
+                   ,tau,ssa,asy,sca,aaod,scasf,aaodsf                   &
                    ,num_chem,ids,ide, jds,jde, kds,kde                     &
                    ,ims,ime, jms,jme, kms,kme                     &
                    ,its,ite, jts,jte, kts,kte )
@@ -8579,7 +8579,7 @@
          INTENT(INOUT ) ::  chem
 !
    REAL(kind_chem), DIMENSION( ims:ime, jms:jme ),INTENT(INOUT ) ::aod,aodbc,aodoc,aoddt,&
-                                                    aodss,aodsu,sca,aaod
+                                                    aodss,aodsu,sca,aaod,scasf,aaodsf
    REAL(kind_chem), DIMENSION( ims:ime, kms:kme, jms:jme ),                       &
          INTENT(IN ) ::  relhum,dz8w, alt
    integer, dimension( its:ite, jts:jte ) :: iprt
@@ -8755,6 +8755,8 @@
       aodsu(i,j)=sum(tausu(i,kts:kte,j,8))
       sca(i,j)=sum(scat(i,kts:kte,j,8))
       aaod(i,j)=sum (aaodly(i,kts:kte,j,8))
+      scasf(i,j)=scat(i,kts,j,8)
+      aaodsf(i,j)=aaodly(i,kts,j,8)
 !     if(iprt(i,j).eq.1)write(6,*)'aod = ',aod(i,j)
   enddo
   enddo
